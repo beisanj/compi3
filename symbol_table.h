@@ -28,7 +28,7 @@ public:
     }
     void printContent(){
         for(auto& s : symbols)
-        output::printID(s->name ,s->offset, s->type);
+            output::printID(s->name ,s->offset, s->type);
     }
     bool checkIfAlreadyExists(string name){
         for(auto& s : symbols){
@@ -50,49 +50,49 @@ public:
 
 class symbolTable{
     std::vector<symbolSubTable*> SubTables;
-   /// std::vector<symbolSubTable*> functions;
-   symbolSubTable* addSubTable(){
-       int cur_offset = SubTables.back()->curr_offset;
-       symbolSubTable* new_subtable = new symbolSubTable(cur_offset);
-       SubTables.push_back(new_subtable);
-   }
-   bool checkIfAlreadyExists(string name){
-       for (auto& s : SubTables){
-           if(s->checkIfAlreadyExists(name)){
-               return true;
-           }
-       }
-       return false;
-   }
-   bool checkIfLegalFunction(string funcName,Node arg) {
-       if (funcName == "print") {
-           if (arg.value == "STRING") {
-               return true;
-           } else {
-               output::errorPrototypeMismatch(lineno,funcName,"string");
-               exit(0);
-           }
+    /// std::vector<symbolSubTable*> functions;
+    symbolSubTable* addSubTable(){
+        int cur_offset = SubTables.back()->curr_offset;
+        symbolSubTable* new_subtable = new symbolSubTable(cur_offset);
+        SubTables.push_back(new_subtable);
+    }
+    bool checkIfAlreadyExists(string name){
+        for (auto& s : SubTables){
+            if(s->checkIfAlreadyExists(name)){
+                return true;
+            }
+        }
+        return false;
+    }
+    bool checkIfLegalFunction(string funcName,Node arg) {
+        if (funcName == "print") {
+            if (arg.value == "STRING") {
+                return true;
+            } else {
+                output::errorPrototypeMismatch(lineno,funcName,"string");
+                exit(0);
+            }
 
-       }
-       else if (funcName =="printi"){
-           if(arg.value == "INT"){
-               return true;
-           } else {
-               output::errorPrototypeMismatch(lineno,funcName,"int");
-               exit(0);
-           }
-       }
-       else if (funcName == "readi"){
-           if(arg.value == "INT"){
-               return true;
-           } else {
-               output::errorPrototypeMismatch(lineno,funcName,"int");
-               exit(0);
-           }
+        }
+        else if (funcName =="printi"){
+            if(arg.value == "INT"){
+                return true;
+            } else {
+                output::errorPrototypeMismatch(lineno,funcName,"int");
+                exit(0);
+            }
+        }
+        else if (funcName == "readi"){
+            if(arg.value == "INT"){
+                return true;
+            } else {
+                output::errorPrototypeMismatch(lineno,funcName,"int");
+                exit(0);
+            }
 
-       }
-       return false;
-   }
+        }
+        return false;
+    }
 
 };
 
