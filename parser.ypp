@@ -1,0 +1,84 @@
+%{
+    #include <stdio.h>
+    #include "output.hpp"
+    #include <iostream>
+    extern int yylineno;
+    extern int yylex();
+    int yyerror(const char* message);
+
+     using namespace output;
+     using namespace std;
+%}
+
+
+    %right ASSIGN
+    %left OR
+    %left AND
+    %left RELOP_EQUAL
+    %left RELOP_GREATER
+    %left ADD_SUB
+    %left MULT_DIV
+	%right NOT
+    %left  RPAREN
+    %right LPAREN
+    %left RBRACE
+    %right LBRACE
+    %left IF
+    %right ELSE
+    %nonassoc STRING INT NUM BYTE BOOL ID B TRUE FALSE CONST SC CONTINUE BREAK RETURN WHILE
+
+%%
+Program: Statements                                                 { }
+
+Statements: Statement                                               { }
+            | Statements Statement                                   {}
+            ;
+
+Statement: LBRACE Statements RBRACE                                 {}
+           | Type ID SC                                             {}
+           | Type ID ASSIGN Exp SC                                  {}
+           | ID ASSIGN Exp SC                                       {}
+           | Call SC                                                {}
+           | RETURN SC                                              {}
+           | IF LPAREN Exp RPAREN Statement                         {}
+           | IF LPAREN Exp RPAREN Statement ELSE Statement          {}
+           | WHILE LPAREN Exp RPAREN Statement                      {}
+           | BREAK SC                                               {}
+           | CONTINUE SC                                            {}
+           ;
+
+Call: ID LPAREN Exp RPAREN                                         {}
+;
+
+Type: INT                                                           {}
+      | BYTE                                                        {}
+      | BOOL                                                        {}
+      ;
+
+Exp: LPAREN Exp RPAREN                                              {}
+     | Exp ADD_SUB Exp                                              {}
+     | Exp MULT_DIV Exp                                             {}
+     | ID                                                           {}
+     | Call                                                         {}
+     | NUM                                                          {$$ = new Num($1);}
+     | NUM B                                                        {checkIfLegalByte(); $$ = new Num($1);}
+     | STRING                                                       {$$ = new String($1);}
+     | TRUE                                                         {$$ = new Bool($1);}
+     | FALSE                                                        {$$ = new Bool($1);}
+     | NOT Exp                                                      {}
+     | Exp AND Exp                                                  {}
+     | Exp OR Exp                                                   {}
+     | Exp RELOP_GREATER Exp                                        {}
+     | Exp RELOP_EQUAL Exp                                          {}
+     | LPAREN Type RPAREN Exp                                       {}
+     ;
+%%
+
+int main(){
+        return yyparse();
+}
+
+int yyerror(const char * message){
+	errorSyn(yylineno);
+	exit(0);
+}
