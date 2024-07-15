@@ -1,5 +1,6 @@
 #include <iostream>
 #include "types.h"
+#define YYSTYPE Node*
 #include "hw3_output.hpp"
 #include "symbol_table.h"
 using namespace output;
@@ -8,6 +9,8 @@ using namespace  std;
 
 symbolTable* table;
 bool isLoop=false;
+
+
 ///
 
 
@@ -115,7 +118,7 @@ void createRes(Node* op1,Node* op2,Node*& res){
 
 
 
-void checkIfLegalCasting(Node* castTo,Node* castFrom,Node*& finalExp){
+Node* checkIfLegalCasting(Node* castTo,Node* castFrom/*,Node*& finalExp*/){
     string castToType=castTo->name;
     string castFromType=castFrom->name;
     Node *to=dynamic_cast<ID*>(castTo);
@@ -129,13 +132,13 @@ void checkIfLegalCasting(Node* castTo,Node* castFrom,Node*& finalExp){
     if(castToType=="BYTE" &&( castFromType == "INT" || castFromType == "BYTE")){
         int realVal= stoi(castFrom->value);
             if(!from) castFrom->name="BYTE";
-            finalExp= new NumB(castFrom->value);
-            return;
+             return new NumB(castFrom->value);
+
     }
     if(castToType=="INT"&&( castFromType == "INT" || castFromType == "BYTE")){
         if(!from) castFrom->name="INT"; ///
-        finalExp= new Num(castFrom->value);
-        return;
+        return new Num(castFrom->value);
+
     }
     else {
         errorMismatch(yylineno);
@@ -145,37 +148,36 @@ void checkIfLegalCasting(Node* castTo,Node* castFrom,Node*& finalExp){
 
 
 
-void calculateResOfComparison(Node* op1, Node* op2, Node* operation, Node*& res){
+void calculateResOfComparison(Node* op1, Node* op2, Node* operation/*, Node*& res)*/){
     if((op1->name=="INT"||op1->name=="BYTE") &&(op2->name=="INT"||op2->name=="BYTE")){
         if(operation->value=="=="){
             bool realVal= stoi(op1->value) == stoi(op2->value);
             string stringVal=(realVal) ? "true":"false";
-            res= new Bool(stringVal);
         }
         if(operation->value==">="){
             bool realVal= stoi(op1->value) >= stoi(op2->value);
             string stringVal=(realVal) ? "true":"false";
-            res= new Bool(stringVal);
+            //res= new Bool(stringVal);
         }
         if(operation->value=="<="){
             bool realVal= stoi(op1->value) <= stoi(op2->value);
             string stringVal=(realVal) ? "true":"false";
-            res= new Bool(stringVal);
+            //res= new Bool(stringVal);
         }
         if(operation->value==">"){
             bool realVal= stoi(op1->value) > stoi(op2->value);
             string stringVal=(realVal) ? "true":"false";
-            res= new Bool(stringVal);
+            //res= new Bool(stringVal);
         }
         if(operation->value=="<"){
             bool realVal= stoi(op1->value) < stoi(op2->value);
             string stringVal=(realVal) ? "true":"false";
-            res= new Bool(stringVal);
+           // res= new Bool(stringVal);
         }
         if(operation->value=="!="){
             bool realVal= stoi(op1->value) != stoi(op2->value);
             string stringVal=(realVal) ? "true":"false";
-            res= new Bool(stringVal);
+        //    res= new Bool(stringVal);
         }
     }
 }

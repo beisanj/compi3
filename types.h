@@ -12,9 +12,6 @@ extern int yylineno;
 extern bool isBreakLegal;
 #define YYSTYPE Node*
 
-
-
-
 class Node {
 public:
 
@@ -56,7 +53,7 @@ public:
     EXP(string val,string name): Node(val,"EXP"){}
 };
 
-
+Node* checkIfLegalCasting(Node* castTo,Node* castFrom/*,Node*& finalExp*/);
 
 
 #endif //UNTITLED24_TYPES_H

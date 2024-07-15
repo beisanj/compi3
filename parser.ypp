@@ -1,13 +1,14 @@
 %{
     #include <stdio.h>
-    #include <symbol_table.h>
-    #include "output.hpp"
+    #include "symbol_table.h"
+    #include "hw3_output.hpp"
+    #include "types.h"
     #include <iostream>
     extern int yylineno;
-    extern int yylex();
+    int yylex();
     extern symbolTable* table;
     int yyerror(const char* message);
-
+    extern isLoop;
      using namespace output;
      using namespace std;
 %}
@@ -38,15 +39,15 @@ Statements: Statement                                               {}
 
 Statement: LBRACE  OPENSUBTABLE Statements RBRACE   CLOSESUBTABLE                              {}
            | Type ID SC                                             {checkIfAlreadyExists($2->name);  table->SubTables.back()->addSymbol($1->name,1);}
-           | Type ID ASSIGN Exp SC                                  {checkIfAlreadyExists($2->name);  table->SubTables.back()->addSymbol($1->name,$2->name,1); Node* node; checkIfLegalCasting($2,$4,node);}
-           | ID ASSIGN Exp SC                                       {checkIfDefinedID($1); Node* node; checkIfLegalCasting($1,$3,node); }
+           | Type ID ASSIGN Exp SC                                  {checkIfAlreadyExists($2->name);  table->SubTables.back()->addSymbol($1->name,$2->name,1); Node* node= checkIfLegalCasting($2,$4);}
+           | ID ASSIGN Exp SC                                       {checkIfDefinedID($1); Node* node=checkIfLegalCasting($1,$3); }
            | Call SC                                                {$$ = $1;}
            | RETURN SC                                              {}
            | IF LPAREN Exp{checkIfBool($3);} RPAREN OPENSUBTABLE Statement CLOSESUBTABLE {}
            | IF LPAREN Exp {checkIfBool($3); }RPAREN OPENSUBTABLE Statement CLOSESUBTABLE ELSE OPENSUBTABLE Statement CLOSESUBTABLE {}
-           | WHILE LPAREN Exp {checkIfBool($3); } RPAREN OPENSUBTABLE {isLoop=true;} Statement CLOSESUBTABLE  {isLoop=false;}
-           | BREAK SC                                               {if(!isLoop) { errorUnexpectedBreak(lineno);exit(0);}
-           | CONTINUE SC                                            {if(!isLoop) { errorUnexpectedBreak(lineno);exit(0);}
+           | WHILE LPAREN Exp {checkIfBool($3);} RPAREN OPENSUBTABLE {isLoop=true;} Statement CLOSESUBTABLE  {isLoop=false;}
+           | BREAK SC                                               {if(!isLoop) {errorUnexpectedBreak(lineno);exit(0);}}
+           | CONTINUE SC                                            {if(!isLoop) { errorUnexpectedBreak(lineno);exit(0);}}
            ;
 
 Call: ID LPAREN Exp RPAREN                                         {table->checkIfLegalFunction($1->value,$3,$$);}
@@ -58,8 +59,8 @@ Type: INT                                                           {$$= $1;}
       ;
 
 Exp: LPAREN Exp RPAREN                                              {$$=$2;}
-     | Exp ADD_SUB Exp                                              {checkIfOpIsIntOrByte($1);checkIfOpIsIntOrByte($);createRes($1,$3,$$);}
-     | Exp MULT_DIV Exp                                             {checkIfOpIsIntOrByte($1);checkIfOpIsIntOrByte($);createRes($1,$3,$$);}
+     | Exp ADD_SUB Exp                                              {checkIfOpIsIntOrByte($1);checkIfOpIsIntOrByte($2);createRes($1,$3,$$);}
+     | Exp MULT_DIV Exp                                             {checkIfOpIsIntOrByte($1);checkIfOpIsIntOrByte($2);createRes($1,$3,$$);}
      | ID                                                           {checkIfDefinedID($1); $$= new ID($1);}
      | Call                                                         {$$=new Node($1);}
      | NUM                                                          {$$ = new Num($1);}
@@ -67,16 +68,16 @@ Exp: LPAREN Exp RPAREN                                              {$$=$2;}
      | STRING                                                       {$$ = new String($1);}
      | TRUE                                                         {$$ = new Bool($1->value);}
      | FALSE                                                        {$$ = new Bool($1->value);}
-     | NOT Exp                                                      { checkIfBool($2);} bool realVal= ($2->value=="false")? "true":"false"; $$=new Bool(realVal);}
+     | NOT Exp                                                      { checkIfBool($2); bool realVal= ($2->value=="false")? "true":"false"; $$=new Bool(realVal);}
      | Exp AND Exp                                                  {checkIfAndOperandsAreBool($1,$3); bool realVal= calculateOp1AndOp2($1,$3); $$=new Bool(realVal);}
      | Exp OR Exp                                                   {checkIfAndOperandsAreBool($1,$3); bool realVal= calculateOp1OrOp2($1,$3); $$=new Bool(realVal);}
-     | Exp RELOP_GREATER Exp                                        {checkIfOpIsIntOrByte($1); checkIfOpIsIntOrByte($3); calculateResOfComparison($1,$2,$3,$$); }
-     | Exp RELOP_EQUAL Exp                                          {checkIfOpIsIntOrByte($1); checkIfOpIsIntOrByte($3); calculateResOfComparison($1,$2,$3,$$);}
-     | LPAREN Type RPAREN Exp                                       {checkIfOpIsIntOrByte($2); checkIfOpIsIntOrByte($4); checkIfLegalCasting($2,$4,$$); }
+     | Exp RELOP_GREATER Exp                                        {checkIfOpIsIntOrByte($1); checkIfOpIsIntOrByte($3); calculateResOfComparison($1,$2,$3); }
+     | Exp RELOP_EQUAL Exp                                          {checkIfOpIsIntOrByte($1); checkIfOpIsIntOrByte($3); calculateResOfComparison($1,$2,$3);}
+     | LPAREN Type RPAREN Exp                                       {checkIfOpIsIntOrByte($2); checkIfOpIsIntOrByte($4); $$=checkIfLegalCasting($2,$4); }
      ;
 
-     OPENSUBTABLE : {table.addSubTable();}
-     CLOSESUBTABLE : {table.removeSubTable();}
+     OPENSUBTABLE : {table->addSubTable();}
+     CLOSESUBTABLE : {table->removeSubTable();}
 %%
 
 int main(){

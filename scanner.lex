@@ -3,6 +3,10 @@
 #include <stdio.h>
     #include "hw3_output.hpp"
     #include "parser.tab.hpp"
+#include "types.h"
+
+
+
 %}
 
 %option yylineno
