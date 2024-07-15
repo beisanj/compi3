@@ -18,32 +18,41 @@ extern bool isBreakLegal;
 class Node {
 public:
 
-    string value; // the type
-    string name; // the var's name
+    string value; // the valur, in the case of id the value is its name
+    string name; // the type
     Node(string val, string nm):value(val),name(nm){}
+    Node(string nm):name(nm){};
+    virtual ~Node()= default;
 
 };
 class Type : public Node {
+public:
     Type(string val): Node(val,"TYPE"){}
 
 };
 class ID : public Node {
+public:
     ID(string val, string nm): Node(val,nm){}
 };
 class Bool: public Node{
+public:
     Bool(string val): Node(val,"BOOL"){}
 
 };
 class Num: public Node{
-    Num(string val,string name): Node(val,"INT"){}
+public:
+    Num(string val): Node(val,"INT"){}
 };
 class NumB: public Node{
-    NumB(string val,string name): Node(val,"BYTE"){}
+public:
+    NumB(string val): Node(val,"BYTE"){}
 };
 class STRING: public Node{
+public:
     STRING(string val,string name): Node(val,"STRING"){}
 };
 class EXP: public Node{
+public:
     EXP(string val,string name): Node(val,"EXP"){}
 };
 

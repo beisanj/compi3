@@ -13,7 +13,7 @@ void output::printID(const string& id, int offset, const string& type) {
 }
 
 string output::makeFunctionType(const string& argType, const string& retType) {
-    
+
     return "(" + argType + ")" + "->" + retType;
 }
 
@@ -50,7 +50,7 @@ void output::errorUnexpectedBreak(int lineno) {
 }
 
 void output::errorUnexpectedContinue(int lineno) {
-    cout << "line " << lineno << ":" << " unexpected continue statement" << endl;	
+    cout << "line " << lineno << ":" << " unexpected continue statement" << endl;
 }
 
 void output::errorByteTooLarge(int lineno, const string& value) {

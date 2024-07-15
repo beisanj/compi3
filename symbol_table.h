@@ -38,6 +38,14 @@ public:
         }
         return false;
     }
+    symbol* retSymbol(string name){
+        for(auto& s : symbols){
+            if(s->name == name){
+                return s;
+            }
+        }
+        return nullptr;
+    }
     bool addSymbol(string name,string type,int val){
         if(checkIfAlreadyExists(name)){
             return false;
@@ -49,6 +57,7 @@ public:
 };
 
 class symbolTable{
+public:
     std::vector<symbolSubTable*> SubTables;
     /// std::vector<symbolSubTable*> functions;
     symbolSubTable* addSubTable(){
@@ -64,9 +73,23 @@ class symbolTable{
         }
         return false;
     }
-    bool checkIfLegalFunction(string funcName,Node arg) {
+    symbol* getSymbol(string name){
+        for (auto& s : SubTables){
+            if(s->retSymbol(name)){
+                return s->retSymbol(name);
+            }
+        }
+        return nullptr;
+    }
+    bool checkIfLegalFunction(string funcName,Node* arg, Node*& res) {
+        string typeofarg=arg->name;
+        Node *n11=dynamic_cast<ID*>(arg);
+        if(n11){
+            typeofarg=getSymbol(arg->name)->type;
+        }
         if (funcName == "print") {
-            if (arg.value == "STRING") {
+            if (typeofarg == "STRING") {
+                res= new Node("void","print");
                 return true;
             } else {
                 output::errorPrototypeMismatch(lineno,funcName,"string");
@@ -75,7 +98,8 @@ class symbolTable{
 
         }
         else if (funcName =="printi"){
-            if(arg.value == "INT"){
+            if(typeofarg == "INT"){
+                res= new Node("void","printi");
                 return true;
             } else {
                 output::errorPrototypeMismatch(lineno,funcName,"int");
@@ -83,7 +107,8 @@ class symbolTable{
             }
         }
         else if (funcName == "readi"){
-            if(arg.value == "INT"){
+            if(typeofarg == "INT"){
+                res= new Node("int","readi");
                 return true;
             } else {
                 output::errorPrototypeMismatch(lineno,funcName,"int");
@@ -92,6 +117,24 @@ class symbolTable{
 
         }
         return false;
+    }
+    void removeSubTable(){
+        if(SubTables.size()==0){
+            return;
+        }
+
+        symbolSubTable *toRemove=SubTables.back();
+        output::endScope();
+        if(SubTables.size()==1){
+            output::printID("print",0,output::makeFunctionType("string","void"));
+            output::printID("printi",0,output::makeFunctionType("int","void"));
+            output::printID("readi",0,output::makeFunctionType("int","int"));
+        }
+        for(auto &s : toRemove->symbols){
+            output::printID(s->name, s->offset,s->type);
+        }
+        SubTables.pop_back();
+        //
     }
 
 };
