@@ -1,9 +1,9 @@
 %{
 /* Declaration Section */
+#include "types.h"
 #include <stdio.h>
     #include "hw3_output.hpp"
     #include "parser.tab.hpp"
-#include "types.h"
 
 
 
@@ -21,8 +21,8 @@ hex              (\\x[0-7][0-9A-Fa-f])
 whitespace       ([\t\n\r ])
 
 %%
-int                                                                                { yylval = new Node(yytext); return INT;}
-byte                                                                               { yylval = new Node(yytext); return BYTE;}
+int                                                                                { yylval = new Node(yytext,yytext); return INT;}
+byte                                                                               { yylval = new Node(yytext,yytext); return BYTE;}
 b                                                                                  {yylval = new Node(yytext); return B;}
 bool                                                                               {yylval = new Node(yytext); return BOOL;}
 and                                                                                 {yylval = new Node(yytext);return AND;}

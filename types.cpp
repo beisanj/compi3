@@ -7,7 +7,7 @@ using namespace output;
 using namespace  std;
 /// global variables
 
-symbolTable* table;
+extern symbolTable* table;
 bool isLoop=false;
 
 
@@ -17,7 +17,7 @@ bool isLoop=false;
 
 void checkIfBool(Node* n){
     string castToType=n->name;
-    Node *node1=dynamic_cast<ID*>(n);
+    Node *node1=dynamic_cast<IDClass*>(n);
     if(node1){
         castToType=table->getSymbol(n->name)->type;
     }
@@ -52,8 +52,8 @@ void checkIfDefinedID(Node *n){
 void checkIfAndOperandsAreBool(Node* n1, Node* n2){
     string typeofn1=n1->name;
     string typeofn2=n2->name;
-    Node *n11=dynamic_cast<ID*>(n1);
-    Node *n22=dynamic_cast<ID*>(n2);
+    Node *n11=dynamic_cast<IDClass*>(n1);
+    Node *n22=dynamic_cast<IDClass*>(n2);
     if(n11){
         typeofn1=table->getSymbol(n1->name)->type;
     }
@@ -67,25 +67,25 @@ void checkIfAndOperandsAreBool(Node* n1, Node* n2){
 
 }
 
-bool calculateOp1AndOp2(Node* n1, Node* n2){
+string calculateOp1AndOp2(Node* n1, Node* n2){
     if(n1->value=="false"|| n2->value=="false"){
-        return false;
+        return "false";
     }
-    return true;
+    return "true";
 
 }
-bool calculateOp1OrOp2(Node* n1, Node* n2){
+string calculateOp1OrOp2(Node* n1, Node* n2){
     if(n1->value=="false"&& n2->value=="false"){
-        return false;
+        return "false";
     }
-    return true;
+    return "true";
 
 }
 
 
 void checkIfOpIsIntOrByte(Node* n1){
     string typeofn=n1->name;
-    Node *to=dynamic_cast<ID*>(n1);
+    Node *to=dynamic_cast<IDClass*>(n1);
     if(n1){
         typeofn=table->getSymbol(n1->name)->type;
     }
@@ -97,8 +97,8 @@ void checkIfOpIsIntOrByte(Node* n1){
 void createRes(Node* op1,Node* op2,Node*& res){
     string op1type=op1->name;
     string op2type=op2->name;
-    Node *to=dynamic_cast<ID*>(op1);
-    Node *from=dynamic_cast<ID*>(op2);
+    Node *to=dynamic_cast<IDClass*>(op1);
+    Node *from=dynamic_cast<IDClass*>(op2);
     if(to){
         op1type=table->getSymbol(op1->name)->type;
     }
@@ -121,14 +121,17 @@ void createRes(Node* op1,Node* op2,Node*& res){
 Node* checkIfLegalCasting(Node* castTo,Node* castFrom/*,Node*& finalExp*/){
     string castToType=castTo->name;
     string castFromType=castFrom->name;
-    Node *to=dynamic_cast<ID*>(castTo);
-    Node *from=dynamic_cast<ID*>(castFrom);
+    Node *to=dynamic_cast<IDClass*>(castTo);
+    Node *from=dynamic_cast<IDClass*>(castFrom);
+
     if(to){
         castToType=table->getSymbol(castTo->name)->type;
     }
     if(from){
         castFromType=table->getSymbol(castFrom->name)->type;
     }
+    cout<< "cast"<<castToType<<endl;
+    cout<< castFromType<<endl;
     if(castToType=="BYTE" &&( castFromType == "INT" || castFromType == "BYTE")){
         int realVal= stoi(castFrom->value);
             if(!from) castFrom->name="BYTE";

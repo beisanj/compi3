@@ -10,7 +10,7 @@
 #include "types.h"
 using std::vector;
 using std::string;
-extern int lineno;
+extern int yylineno;
 class symbol{
 public:
     string name;
@@ -53,6 +53,8 @@ public:
         symbol* new_symbol = new symbol(name,type,curr_offset,val);
         symbols.push_back(new_symbol);
         curr_offset++;
+        cout<< "reached addSymbol"<<endl;
+        return true;
     }
 };
 
@@ -61,16 +63,30 @@ public:
     std::vector<symbolSubTable*> SubTables;
     /// std::vector<symbolSubTable*> functions;
     symbolSubTable* addSubTable(){
-        int cur_offset = SubTables.back()->curr_offset;
+        int cur_offset=0;
+        if(!SubTables.empty()){
+            cout<<"68"<<endl;
+
+            cur_offset = SubTables.back()->curr_offset;
+        }
         symbolSubTable* new_subtable = new symbolSubTable(cur_offset);
         SubTables.push_back(new_subtable);
+        return SubTables.back();
+    }
+    symbolTable(){
+        cout<<"75"<<endl;
+        addSubTable();
     }
     bool checkIfAlreadyExists(string name){
+        if(SubTables.empty())
+            return false;
         for (auto& s : SubTables){
+            cout<<"checkIfAlreadyExists"<<endl;
             if(s->checkIfAlreadyExists(name)){
                 return true;
             }
         }
+
         return false;
     }
     symbol* getSymbol(string name){
@@ -83,7 +99,7 @@ public:
     }
     bool checkIfLegalFunction(string funcName,Node* arg, Node*& res) {
         string typeofarg=arg->name;
-        Node *n11=dynamic_cast<ID*>(arg);
+        Node *n11=dynamic_cast<IDClass*>(arg);
         if(n11){
             typeofarg=getSymbol(arg->name)->type;
         }
@@ -92,7 +108,7 @@ public:
                 res= new Node("void","print");
                 return true;
             } else {
-                output::errorPrototypeMismatch(lineno,funcName,"string");
+                output::errorPrototypeMismatch(yylineno,funcName,"string");
                 exit(0);
             }
 
@@ -102,7 +118,7 @@ public:
                 res= new Node("void","printi");
                 return true;
             } else {
-                output::errorPrototypeMismatch(lineno,funcName,"int");
+                output::errorPrototypeMismatch(yylineno,funcName,"int");
                 exit(0);
             }
         }
@@ -111,7 +127,7 @@ public:
                 res= new Node("int","readi");
                 return true;
             } else {
-                output::errorPrototypeMismatch(lineno,funcName,"int");
+                output::errorPrototypeMismatch(yylineno,funcName,"int");
                 exit(0);
             }
 

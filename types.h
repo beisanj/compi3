@@ -12,48 +12,65 @@ extern int yylineno;
 extern bool isBreakLegal;
 #define YYSTYPE Node*
 
+
 class Node {
 public:
 
-    string value; // the valur, in the case of id the value is its name
-    string name; // the type
+    string value; // the type
+    string name; // the var's name
+    virtual ~Node()=default;
     Node(string val, string nm):value(val),name(nm){}
-    Node(string nm):name(nm){};
-    virtual ~Node()= default;
+     Node(string nm): name(nm){}
+    Node(Node *n):value(n->value),name(n->name){}
 
 };
 class Type : public Node {
 public:
     Type(string val): Node(val,"TYPE"){}
+    Type(Node* n):Node(n->value,n->name){};
 
 };
-class ID : public Node {
+class IDClass : public Node {
 public:
-    ID(string val, string nm): Node(val,nm){}
+    IDClass(string val, string nm): Node(val,nm){}
+    IDClass(Node* n):Node(n->value,n->name){}
 };
 class Bool: public Node{
 public:
     Bool(string val): Node(val,"BOOL"){}
-
+   Bool(Node* n):Node(n->value,n->name){};
 };
 class Num: public Node{
 public:
     Num(string val): Node(val,"INT"){}
+    Num(Node* n):Node(n->value,n->name){}
+
 };
 class NumB: public Node{
 public:
     NumB(string val): Node(val,"BYTE"){}
+    NumB(Node* n):Node(n->value,n->name){}
 };
-class STRING: public Node{
+class STRINGClass: public Node{
 public:
-    STRING(string val,string name): Node(val,"STRING"){}
+    STRINGClass(string val,string name): Node(val,"STRING"){}
+    STRINGClass(Node* n):Node(n->value,n->name){}
 };
 class EXP: public Node{
-public:
+    public:
     EXP(string val,string name): Node(val,"EXP"){}
+    EXP(Node* n):Node(n->value,n->name){};
 };
 
-Node* checkIfLegalCasting(Node* castTo,Node* castFrom/*,Node*& finalExp*/);
-
+void checkIfBool(Node* n);
+void checkIfLegalByte(Node* n);
+void checkIfDefinedID(Node *n);
+void checkIfAndOperandsAreBool(Node* n1, Node* n2);
+string calculateOp1AndOp2(Node* n1, Node* n2);
+string calculateOp1OrOp2(Node* n1, Node* n2);
+void checkIfOpIsIntOrByte(Node* n1);
+void createRes(Node* op1,Node* op2,Node*& res);
+Node* checkIfLegalCasting(Node* castTo,Node* castFrom);
+void calculateResOfComparison(Node* op1, Node* op2, Node* operation);
 
 #endif //UNTITLED24_TYPES_H
