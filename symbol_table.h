@@ -53,7 +53,7 @@ public:
         symbol* new_symbol = new symbol(name,type,curr_offset,val);
         symbols.push_back(new_symbol);
         curr_offset++;
-        cout<< "reached addSymbol"<<endl;
+      //  cout<< "reached addSymbol"<<endl;
         return true;
     }
 };
@@ -65,7 +65,7 @@ public:
     symbolSubTable* addSubTable(){
         int cur_offset=0;
         if(!SubTables.empty()){
-            cout<<"68"<<endl;
+         //   cout<<"68"<<endl;
 
             cur_offset = SubTables.back()->curr_offset;
         }
@@ -74,14 +74,14 @@ public:
         return SubTables.back();
     }
     symbolTable(){
-        cout<<"75"<<endl;
+     //   cout<<"75"<<endl;
         addSubTable();
     }
     bool checkIfAlreadyExists(string name){
         if(SubTables.empty())
             return false;
         for (auto& s : SubTables){
-            cout<<"checkIfAlreadyExists"<<endl;
+          //  cout<<"checkIfAlreadyExists"<<endl;
             if(s->checkIfAlreadyExists(name)){
                 return true;
             }
@@ -97,16 +97,16 @@ public:
         }
         return nullptr;
     }
-    bool checkIfLegalFunction(string funcName,Node* arg, Node*& res) {
+    Node* checkIfLegalFunction(string funcName,Node* arg/*, Node*& res*/) {
         string typeofarg=arg->name;
+       // cout<<"func name"<<funcName<<endl;
         Node *n11=dynamic_cast<IDClass*>(arg);
         if(n11){
             typeofarg=getSymbol(arg->name)->type;
         }
         if (funcName == "print") {
             if (typeofarg == "STRING") {
-                res= new Node("void","print");
-                return true;
+                return new Node("print","VOID");
             } else {
                 output::errorPrototypeMismatch(yylineno,funcName,"string");
                 exit(0);
@@ -115,8 +115,8 @@ public:
         }
         else if (funcName =="printi"){
             if(typeofarg == "INT"){
-                res= new Node("void","printi");
-                return true;
+                return new Node("printi","VOID");
+
             } else {
                 output::errorPrototypeMismatch(yylineno,funcName,"int");
                 exit(0);
@@ -124,15 +124,16 @@ public:
         }
         else if (funcName == "readi"){
             if(typeofarg == "INT"){
-                res= new Node("int","readi");
-                return true;
+                return new Node("readi","INT");
+              //  cout<<"success line 128"<<endl;
+               // return true;
             } else {
                 output::errorPrototypeMismatch(yylineno,funcName,"int");
                 exit(0);
             }
 
         }
-        return false;
+        return nullptr;
     }
     void removeSubTable(){
         if(SubTables.size()==0){
@@ -142,9 +143,9 @@ public:
         symbolSubTable *toRemove=SubTables.back();
         output::endScope();
         if(SubTables.size()==1){
-            output::printID("print",0,output::makeFunctionType("string","void"));
-            output::printID("printi",0,output::makeFunctionType("int","void"));
-            output::printID("readi",0,output::makeFunctionType("int","int"));
+            output::printID("print",0,output::makeFunctionType("STRING","VOID"));
+            output::printID("printi",0,output::makeFunctionType("INT","VOID"));
+            output::printID("readi",0,output::makeFunctionType("INT","INT"));
         }
         for(auto &s : toRemove->symbols){
             output::printID(s->name, s->offset,s->type);

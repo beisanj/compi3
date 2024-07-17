@@ -48,7 +48,7 @@ continue                                                                        
 \+|\-                                                                            {  yylval = new Node(yytext);    return ADD_SUB;}
 
 \/\/[^\n\r]*[\n|\r|\n\r]?                                                                        ;
-{letter}{letterdigit}*                                                            {  yylval = new Node(yytext);   return ID;}
+{letter}{letterdigit}*                                                            {  yylval = new IDClass(yytext);   return ID;}
 ([1-9]+{digit}*)|0                                                                 {  yylval = new Node(yytext);  return NUM;}
 \"([^\n\r\"\\]|\\[rnt"\\])+\"                                         {  yylval = new Node(yytext);    return STRING;}
 

@@ -32,7 +32,7 @@ public:
 };
 class IDClass : public Node {
 public:
-    IDClass(string val, string nm): Node(val,nm){}
+    IDClass(string nm): Node("ID",nm){}
     IDClass(Node* n):Node(n->value,n->name){}
 };
 class Bool: public Node{
@@ -53,7 +53,7 @@ public:
 };
 class STRINGClass: public Node{
 public:
-    STRINGClass(string val,string name): Node(val,"STRING"){}
+    STRINGClass(string val): Node(val,"STRING"){}
     STRINGClass(Node* n):Node(n->value,n->name){}
 };
 class EXP: public Node{
@@ -63,8 +63,9 @@ class EXP: public Node{
 };
 
 void checkIfBool(Node* n);
-void checkIfLegalByte(Node* n);
+void checkIfLegalByte(string n);
 void checkIfDefinedID(Node *n);
+Node* checkIfLegalCastingWithBool(Node* castTo,Node* castFrom/*,Node*& finalExp*/);
 void checkIfAndOperandsAreBool(Node* n1, Node* n2);
 string calculateOp1AndOp2(Node* n1, Node* n2);
 string calculateOp1OrOp2(Node* n1, Node* n2);

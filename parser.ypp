@@ -6,7 +6,7 @@
     #include <iostream>
     extern int yylineno;
     int yylex();
-     symbolTable* table = new symbolTable();
+     symbolTable* table;
     int yyerror(const char* message);
     extern bool isLoop;
      using namespace output;
@@ -37,42 +37,42 @@ Statements: Statement                                               {}
             | Statements Statement                                  {}
             ;
 
-Statement: LBRACE  OPENSUBTABLE Statements RBRACE   CLOSESUBTABLE                              {}
+Statement: LBRACE  OPENSUBTABLE Statements RBRACE CLOSESUBTABLE                              {}
            | Type ID SC                                             {table->checkIfAlreadyExists($2->name);  table->SubTables.back()->addSymbol($2->name,$1->name,1);}
-           | Type ID /*{cout<<"marker between id and assign"<<endl;}*/ ASSIGN /*{cout<<"marker between assign and exp"<<endl;}*/  Exp {cout<<"marker between exp and sc"<<endl;} SC {cout<<$2->name<<endl;if(!table) cout<<"table is null"<<endl;table->checkIfAlreadyExists($2->name); cout<<"type name:"<<$1->name<<endl; cout<<"type val:"<<$1->value<<endl; table->SubTables.back()->addSymbol($2->name,$1->name,1); Node* node= checkIfLegalCasting($2,$4);}
-           | ID ASSIGN Exp SC                                       {checkIfDefinedID($1); Node* node=checkIfLegalCasting($1,$3); }
+           | Type ID ASSIGN Exp  SC {  table->checkIfAlreadyExists($2->name);  table->SubTables.back()->addSymbol($2->name,$1->name,1);  Node* node= checkIfLegalCastingWithBool($2,$4);}
+           | ID ASSIGN Exp SC                                       {checkIfDefinedID($1); Node* node=checkIfLegalCastingWithBool($1,$3); }
            | Call SC                                                {$$ = $1;}
            | RETURN SC                                              {}
-           | IF LPAREN Exp{checkIfBool($3);} RPAREN OPENSUBTABLE Statement CLOSESUBTABLE {}
-           | IF LPAREN Exp {checkIfBool($3); }RPAREN OPENSUBTABLE Statement CLOSESUBTABLE ELSE OPENSUBTABLE Statement CLOSESUBTABLE {}
+           | IF LPAREN Exp{checkIfBool($3);} RPAREN OPENSUBTABLE  Statement CLOSESUBTABLE {}
+           | IF LPAREN Exp {checkIfBool($3);} RPAREN OPENSUBTABLE Statement CLOSESUBTABLE ELSE OPENSUBTABLE Statement CLOSESUBTABLE {}
            | WHILE LPAREN Exp {checkIfBool($3);} RPAREN OPENSUBTABLE {isLoop=true;} Statement CLOSESUBTABLE  {isLoop=false;}
            | BREAK SC                                               {if(!isLoop) {errorUnexpectedBreak(yylineno);exit(0);}}
            | CONTINUE SC                                            {if(!isLoop) { errorUnexpectedBreak(yylineno);exit(0);}}
            ;
 
-Call: ID LPAREN Exp RPAREN                                         {table->checkIfLegalFunction($1->value,$3,$$);}
+Call: ID LPAREN Exp RPAREN                                         {$$=table->checkIfLegalFunction($1->name,$3); }
 ;
 
-Type: INT                                                           {cout<<"reducing type"<<endl; $$= $1; cout<<"finished reducing type"<<endl;}
-      | BYTE                                                        {$$= $1;}
-      | BOOL                                                        {$$= $1;}
+Type: INT                                                           {$$= new Num($1->name); }
+      | BYTE                                                        {$$= new NumB($1->name);}
+      | BOOL                                                        {$$= new Bool($1->name);}
       ;
 
 Exp: LPAREN Exp RPAREN                                              {$$=$2;}
-     | Exp ADD_SUB Exp                                              {checkIfOpIsIntOrByte($1);checkIfOpIsIntOrByte($2);createRes($1,$3,$$);}
-     | Exp MULT_DIV Exp                                             {checkIfOpIsIntOrByte($1);checkIfOpIsIntOrByte($2);createRes($1,$3,$$);}
-     | ID                                                           {cout<<"reducing exp"<<endl; checkIfDefinedID($1); $$= new IDClass($1);}
-     | Call                                                         {$$=new Node($1);}
-     | NUM                                                          {cout<<"reducing num"<<endl; $$ = new Num($1); cout<<"finished reducing num"<<endl; }
-     | NUM B                                                        {checkIfLegalByte($1); $$ = new Num($1);}
-     | STRING                                                       {$$ = new STRINGClass($1);}
-     | TRUE                                                         {$$ = new Bool($1->value);}
-     | FALSE                                                        {$$ = new Bool($1->value);}
+     | Exp ADD_SUB Exp                                              {checkIfOpIsIntOrByte($1);checkIfOpIsIntOrByte($3);createRes($1,$3,$$);}
+     | Exp MULT_DIV Exp                                             {checkIfOpIsIntOrByte($1);checkIfOpIsIntOrByte($3);createRes($1,$3,$$);}
+     | ID                                                           { checkIfDefinedID($1); $$= new IDClass($1);}
+     | Call                                                         { $$=new Node($1); }
+     | NUM                                                          {$$ = new Num($1->name);  }
+     | NUM B                                                        {checkIfLegalByte($1->name); $$ = new Num($1->name);}
+     | STRING                                                       {$$ = new STRINGClass($1->name);}
+     | TRUE                                                         {$$ = new Bool($1->name);}
+     | FALSE                                                        {$$ = new Bool($1->name);}
      | NOT Exp                                                      { checkIfBool($2); string realVal= ($2->value=="false")? "true":"false"; $$=new Bool(realVal);}
      | Exp AND Exp                                                  {checkIfAndOperandsAreBool($1,$3); string realVal= calculateOp1AndOp2($1,$3); $$=new Bool(realVal);}
      | Exp OR Exp                                                   {checkIfAndOperandsAreBool($1,$3); string realVal= calculateOp1OrOp2($1,$3); $$=new Bool(realVal);}
-     | Exp RELOP_GREATER Exp                                        {checkIfOpIsIntOrByte($1); checkIfOpIsIntOrByte($3); calculateResOfComparison($1,$2,$3); }
-     | Exp RELOP_EQUAL Exp                                          {checkIfOpIsIntOrByte($1); checkIfOpIsIntOrByte($3); calculateResOfComparison($1,$2,$3);}
+     | Exp RELOP_GREATER Exp                                        {checkIfOpIsIntOrByte($1); checkIfOpIsIntOrByte($3);   $$=new Bool("false"); }
+     | Exp RELOP_EQUAL Exp                                          {checkIfOpIsIntOrByte($1); checkIfOpIsIntOrByte($3);  $$=new Bool("false");/*calculateResOfComparison($1,$2,$3);*/}
      | LPAREN Type RPAREN Exp                                       {checkIfOpIsIntOrByte($2); checkIfOpIsIntOrByte($4); $$=checkIfLegalCasting($2,$4); }
      ;
 
@@ -81,7 +81,10 @@ Exp: LPAREN Exp RPAREN                                              {$$=$2;}
 %%
 
 int main(){
-        return yyparse();
+       table=  new symbolTable();
+     int n=yyparse();
+        table->removeSubTable();
+        return n;
 }
 
 int yyerror(const char * message){
